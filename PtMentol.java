@@ -4,10 +4,12 @@ import java.util.Random;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
+import java.util.InputMismatchException ;
 
 public class PtMentol{
    static ArrayList<person> Karyawan= new ArrayList<person>();
    static Scanner UserInput = new Scanner( System.in );
+   static Random rand = new Random();
    public class person{
       public String Id;
       public String Name;
@@ -32,6 +34,8 @@ public class PtMentol{
          System.out.printf("Masukan Input:");
          int choice = UserInput.nextInt();
          UserInput.nextLine();
+         // person p = new person("abab","Pattrick","Perempuan","Admin",8000000);
+         // Karyawan.add(p);
          switch(choice){
             case 1:
                System.out.println("input data karyawan:");
@@ -55,23 +59,32 @@ public class PtMentol{
       }
    }
 
+   String getKodeKaryawan(){
+      StringBuilder strbuild = new StringBuilder();
+      char Firstdigit= (char)(rand.nextInt(26) + 'A');
+      char Seconddigit= (char)(rand.nextInt(26) + 'A');
+      int number = rand.nextInt(100000000);
+      strbuild.append(Firstdigit).append(Seconddigit).append(String.format("%06d", number));
+      return strbuild.toString();
+   }
+
    //validasi belom
    private void insert_data(int change) {
       String kodeKaryawan,namaKaryawan,jenisKelamin,jabatan;
       int gaji;
+
       //initialise string to emptystring
       kodeKaryawan=namaKaryawan=jenisKelamin=jabatan="";
 
-      // while(kodeKaryawan.substring(0,2).is)
-      System.out.printf("Masukan Kode Karyawan: ");
-      kodeKaryawan = UserInput.nextLine();
-
-      while(namaKaryawan.length()<3){
-         System.out.printf("Masukan Nama Karyawan: ");
+      Boolean validNamaKaryawan = false;
+      kodeKaryawan = getKodeKaryawan();
+      while(namaKaryawan.length()<3&&!validNamaKaryawan){
+         System.out.printf("Masukan Nama Karyawan[min..3 character]: ");
          namaKaryawan = UserInput.nextLine();
+         if(namaKaryawan.matches("^[a-zA-Z]{3,}"))validNamaKaryawan = true;
       }
       while(!jenisKelamin.equals("Laki-Laki")&&!jenisKelamin.equals("Perempuan")){
-         System.out.printf("Masukan Jenis Kelamin: ");
+         System.out.printf("Masukan Jenis Kelamin[Laki-Laki || Perempuan]: ");
          jenisKelamin = UserInput.nextLine();
       }
       while(!jabatan.equals("Manager")&&!jabatan.equals("Supervisor")&&!jabatan.equals("Admin")){
@@ -88,13 +101,14 @@ public class PtMentol{
       ascending();
       if(change == 0)
          Karyawan.add(p);
-      else
+      else{
          change -=1;
          Karyawan.get(change).Id = kodeKaryawan;
          Karyawan.get(change).Name = namaKaryawan;
          Karyawan.get(change).JenisKelamin = jenisKelamin;
          Karyawan.get(change).Jabatan = jabatan;
          Karyawan.get(change).Gaji = gaji;
+      }
    }
    private void ascending(){
       if(Karyawan.isEmpty())return;
@@ -117,42 +131,68 @@ public class PtMentol{
       "Jabatan",
       "Gaji"
       );
-      for(int i = 0 ; i<Karyawan.size() ; i++){
-         System.out.printf("%d %-20s %-20s %-20s %-20s %-20s\n",
-         i+1,
-         Karyawan.get(i).Id,
-         Karyawan.get(i).Name,
-         Karyawan.get(i).JenisKelamin,
-         Karyawan.get(i).Jabatan,
-         Karyawan.get(i).Gaji);
+      if(Karyawan.size()==0) System.out.printf("%50s\n","No data to show");
+      else{
+         for(int i = 0 ; i<Karyawan.size() ; i++){
+            System.out.printf("%d %-20s %-20s %-20s %-20s %-20s\n",
+            i+1,
+            Karyawan.get(i).Id,
+            Karyawan.get(i).Name,
+            Karyawan.get(i).JenisKelamin,
+            Karyawan.get(i).Jabatan,
+            Karyawan.get(i).Gaji);
+         }
       }
    }
+
    private void update_data() {
       if(Karyawan.isEmpty()) System.out.println("No data to update");
       else{
          view_data();
-         int number = UserInput.nextInt();
-         UserInput.nextLine();
+         int number = 0;
+         while(number<=0||number>Karyawan.size()){
+            try{
+               System.out.println("Masukan nomor Karyawan yang ingin di update: ");
+               number = UserInput.nextInt();
+               UserInput.nextLine();
+               if(number>Karyawan.size()){
+                  System.out.println("Angka Tidak Valid...");
+               }
+            }catch(InputMismatchException err){
+               System.out.println("Please Input an integer...");
+               UserInput.nextLine();
+            }
+         }
          insert_data(number);
       }
    }
+
 
    private void delete_data() {
       if(Karyawan.isEmpty()) System.out.println("No data to delete");
       else{
          view_data();
-         int number = UserInput.nextInt();
-         UserInput.nextLine();
+         int number = 0;
+         while(number<=0||number>Karyawan.size()){
+            try{
+               System.out.println("Masukan nomor Karyawan yang ingin di hapus: ");
+               number = UserInput.nextInt();
+               UserInput.nextLine();
+               if(number>Karyawan.size()){
+                  System.out.println("Angka Tidak Valid...");
+               }
+            }catch(InputMismatchException err){
+               System.out.println("Please Input an integer...");
+               UserInput.nextLine();
+            }
+         }
          Karyawan.remove(number-1);
       }
    }
+
+   //start program
    public static void main(String[] args){
       new PtMentol();
    }
-
-
-
-
-//end main
 }
 
