@@ -8,6 +8,9 @@ import java.util.InputMismatchException ;
 
 public class PtMentol{
    static ArrayList<person> Karyawan= new ArrayList<person>();
+   static int[] JabatanCounter = new int[3];
+
+
    static Scanner UserInput = new Scanner( System.in );
    static Random rand = new Random();
    public class person{
@@ -15,9 +18,9 @@ public class PtMentol{
       public String Name;
       public String JenisKelamin;
       public String Jabatan;
-      public int Gaji;
+      public float Gaji;
 
-      public person(String id ,String name,String JenisKelamin,String Jabatan,int Gaji){
+      public person(String id ,String name,String JenisKelamin,String Jabatan,float Gaji){
       this.Id=id;
       this.Name=name;
       this.JenisKelamin=JenisKelamin;
@@ -26,6 +29,9 @@ public class PtMentol{
       }
    }
    public PtMentol(){
+      JabatanCounter[0] = 0;
+      JabatanCounter[1] = 0;
+      JabatanCounter[2] = 0;
       while(true){
          System.out.println("1. input data karyawan:");
          System.out.println("2. view data karyawan:");
@@ -58,13 +64,64 @@ public class PtMentol{
          }
       }
    }
+   static void setBonus(String jabatan,int state){
+      int curr_jabatan=0;
+      float bonus = 0;
+
+      if(jabatan.equals("Manager")){
+         //adding
+         if(state==0){
+            JabatanCounter[0]++;
+            curr_jabatan = 0;
+            bonus = 10f;
+         }
+         //delete
+         else if(state==2){
+            JabatanCounter[0]--;
+         }
+      }
+      else if(jabatan.equals("Supervisor")){
+          //adding
+          if(state==0){
+            JabatanCounter[1]++;
+            curr_jabatan = 1;
+            bonus = 7.5f;
+         }
+         //delete
+         else if(state==2){
+            JabatanCounter[1]++;
+         }
+      }
+      else{
+          //adding
+         if(state==0){
+            JabatanCounter[2]++;
+            curr_jabatan = 1;
+            bonus = 7.5f;
+         }
+         //delete
+         else if(state==2){
+            JabatanCounter[2]++;
+         }
+      }
+      if(JabatanCounter[curr_jabatan]!=1&&JabatanCounter[curr_jabatan]%3==1){
+         System.out.printf("Bonus sebesar %f%s telah diberikan kepada karyawan dengan id",bonus,"%");
+         for(int i = 0 ; i<Karyawan.size() ; i++){
+            if(Karyawan.get(i).Jabatan.equals(jabatan)){
+               System.out.printf("%s",Karyawan.get(i).Id);
+               Karyawan.get(i).Gaji+= Karyawan.get(i).Gaji*(bonus/100);
+            }
+         }
+
+      }
+   }
 
    String getKodeKaryawan(){
       StringBuilder strbuild = new StringBuilder();
       char Firstdigit= (char)(rand.nextInt(26) + 'A');
       char Seconddigit= (char)(rand.nextInt(26) + 'A');
       int number = rand.nextInt(100000000);
-      strbuild.append(Firstdigit).append(Seconddigit).append(String.format("%06d", number));
+      strbuild.append(Firstdigit).append(Seconddigit).append("-").append(String.format("%06d", number));
       return strbuild.toString();
    }
 
@@ -83,25 +140,32 @@ public class PtMentol{
          namaKaryawan = UserInput.nextLine();
          if(namaKaryawan.matches("^[a-zA-Z]{3,}"))validNamaKaryawan = true;
       }
+
       while(!jenisKelamin.equals("Laki-Laki")&&!jenisKelamin.equals("Perempuan")){
          System.out.printf("Masukan Jenis Kelamin[Laki-Laki || Perempuan]: ");
          jenisKelamin = UserInput.nextLine();
       }
+
       while(!jabatan.equals("Manager")&&!jabatan.equals("Supervisor")&&!jabatan.equals("Admin")){
          System.out.printf("Masukan Jabatan: ");
          jabatan = UserInput.nextLine();
       }
+
       gaji = (jabatan.equals("Manager"))?8000000:
          (jabatan.equals("Supervisor"))?6000000:4000000;
+
 
 
       person p = new person(kodeKaryawan,namaKaryawan,jenisKelamin,jabatan,gaji);
 
       //setiap ada data yang masuk lgsg kita sort
       ascending();
+      setBonus(jabatan,0);
       if(change == 0)
          Karyawan.add(p);
       else{
+         //kalo ada pergantian kita ubah
+         //misal ubah data nomor ke 1 karena array dri 0 kita -1 kan
          change -=1;
          Karyawan.get(change).Id = kodeKaryawan;
          Karyawan.get(change).Name = namaKaryawan;
@@ -186,6 +250,7 @@ public class PtMentol{
                UserInput.nextLine();
             }
          }
+         setBonus(Karyawan.get(number-1).Jabatan,2);
          Karyawan.remove(number-1);
       }
    }
